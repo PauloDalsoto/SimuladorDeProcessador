@@ -25,42 +25,82 @@ class Pipeline:
     def write_back(self):
         instruction = self.stages['MEM']
         self.stages['WB'] = instruction
-        pass
+        
+        if instruction:
+            match instruction.opcode:
+                case 'add':
+                    oper3 = instruction.oper3[1:]
+                    self.registers.write(oper3, instruction.temp1)
+                    print(f'write back -> Valor de {instruction.oper3}: {instruction.temp1}')
+                
+                case 'sub':
+                    oper3 = instruction.oper3[1:]
+                    self.registers.write(oper3, instruction.temp1)
+                    
+                case 'lw':
+                    oper2 = instruction.oper2[1:]
+                    self.registers.write(oper2, instruction.temp1)    
 
     def memory_access(self):
         instruction = self.stages['EX']
         self.stages['MEM'] = instruction
-        pass
+        
+        if instruction:
+            match instruction.opcode:
+                case 'lw':
+                    instruction.temp1 = self.data_memory[self.label_map[instruction.oper3]]
+                    print(f'mem acces -> Valor de {instruction.oper3}: {instruction.temp1}')
     
     def execute(self):
         instruction = self.stages['ID']
         self.stages['EX'] = instruction
-        pass
+        
+        if instruction:
+            match instruction.opcode:
+                case 'add':
+                    oper1 = self.registers.read(instruction.oper1[1:])
+                    oper2 = self.registers.read(instruction.oper2[1:])
+                    instruction.temp1 = oper1 + oper2
+                    
+                case 'sub':
+                    oper1 = self.registers.read(instruction.oper1[1:])
+                    oper2 = self.registers.read(instruction.oper2[1:])
+                    instruction.temp1 = oper1 - oper2
+                    
+                case 'lw':
+                    oper1 = self.registers.read(instruction.oper1[1:])
+                    oper2 = self.registers.read(instruction.oper2[1:])
+                    instruction.temp1 = oper1 + oper2
 
     def decode(self):
-        # se o estagio anterior nao for done
-        instruction = (self.stages['IF'] if self.stages['IF'] and self.stages['IF'].opcode != "done" else None)
-        self.stages['ID'] = instruction
-        pass
-    
-    def instruction_fetch(self):
-        # Verifica se ainda há instruções a serem buscadas
-        if self.instruction_index < len(self.instruction_memory):
-            instr_data = self.instruction_memory[self.instruction_index].split()
-
-            # Obtém o opcode e os operandos
+        if_instr = self.stages['IF']
+        
+        if if_instr:
+            if 'done' in if_instr:
+                opcode = if_instr
+                self.stages['ID'] = Instruction(opcode, None, None, None)
+                return 
+             
+            instr_data = if_instr.split() 
             opcode = instr_data[0]
             oper1  = instr_data[1] if len(instr_data) > 1 else None
             oper2  = instr_data[2] if len(instr_data) > 2 else None
             oper3  = instr_data[3] if len(instr_data) > 3 else None
-
-            self.instruction_index += 1
             instruction = Instruction(opcode, oper1, oper2, oper3)
+        else:
+            instruction = None
+        
+        self.stages['ID'] = instruction
+        
+    def instruction_fetch(self):
+        # Não busca novas instruções se 'done' já foi encontrado
+        if self.instruction_index < len(self.instruction_memory):
+            instr_raw = self.instruction_memory[self.instruction_index]
+            self.instruction_index += 1
+            self.stages['IF'] = instr_raw
+        else:
+            self.stages['IF'] = None
             
-            self.stages['IF'] = instruction
-
-
-
     def clock(self):
         self.clock_cycle += 1
         

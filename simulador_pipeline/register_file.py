@@ -4,8 +4,8 @@ class RegisterFile:
         self.registers[0] = 0
     
     def read(self, reg_num):
-        return self.registers[reg_num]
+        return self.registers[int(reg_num)]
     
     def write(self, reg_num, value):
         if reg_num != 0:
-            self.registers[reg_num] = value
+            self.registers[int(reg_num)] = value

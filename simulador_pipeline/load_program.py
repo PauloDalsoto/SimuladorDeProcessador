@@ -15,7 +15,7 @@ def load_program(filename):
                     # Armazena o valor na próxima posição da memória de dados
                     data_memory[data_index] = int(stripped_line.split()[2])  # Pega o valor após o nome da variável
                     data_index += 1
-                    label_map[stripped_line.split()[0]] = data_index
+                    label_map[stripped_line.split()[0]] = data_index - 1
                 else:
                     instructions.append(stripped_line)
     
