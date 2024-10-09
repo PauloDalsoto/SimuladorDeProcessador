@@ -26,7 +26,7 @@ class Pipeline:
         instruction = self.stages['MEM']
         self.stages['WB'] = instruction
         
-        if instruction:
+        if instruction and instruction.valida:
             match instruction.opcode:
                 case 'add':
                     oper3 = instruction.oper3[1:]
@@ -45,17 +45,17 @@ class Pipeline:
         instruction = self.stages['EX']
         self.stages['MEM'] = instruction
         
-        if instruction:
+        if instruction and instruction.valida:
             match instruction.opcode:
-                case 'lw':
-                    instruction.temp1 = self.data_memory[self.label_map[instruction.oper3]]
-                    print(f'mem acces -> Valor de {instruction.oper3}: {instruction.temp1}')
+                case 'sw':
+                    self.data_memory[int(instruction.temp1)] = self.registers.read(instruction.oper2[1:])
+                    self.label_map[instruction.temp3] = instruction.temp1
     
     def execute(self):
         instruction = self.stages['ID']
         self.stages['EX'] = instruction
         
-        if instruction:
+        if instruction and instruction.valida:
             match instruction.opcode:
                 case 'add':
                     oper1 = self.registers.read(instruction.oper1[1:])
@@ -69,8 +69,13 @@ class Pipeline:
                     
                 case 'lw':
                     oper1 = self.registers.read(instruction.oper1[1:])
-                    oper2 = self.registers.read(instruction.oper2[1:])
-                    instruction.temp1 = oper1 + oper2
+                    oper3 = self.data_memory[self.label_map[instruction.oper3]]
+                    instruction.temp1 = oper1 + oper3
+                
+                case 'sw':
+                    oper1 = self.registers.read(instruction.oper1[1:])
+                    oper3 = self.registers.read(instruction.oper3)
+                    instruction.temp1 = oper1 + oper3
 
     def decode(self):
         if_instr = self.stages['IF']
@@ -86,14 +91,17 @@ class Pipeline:
             oper1  = instr_data[1] if len(instr_data) > 1 else None
             oper2  = instr_data[2] if len(instr_data) > 2 else None
             oper3  = instr_data[3] if len(instr_data) > 3 else None
+
             instruction = Instruction(opcode, oper1, oper2, oper3)
+            if instruction.opcode == 'sw':
+                instruction.temp3 = instr_data[4] if len(instr_data) > 4 else None
+                
         else:
             instruction = None
         
         self.stages['ID'] = instruction
         
     def instruction_fetch(self):
-        # Não busca novas instruções se 'done' já foi encontrado
         if self.instruction_index < len(self.instruction_memory):
             instr_raw = self.instruction_memory[self.instruction_index]
             self.instruction_index += 1

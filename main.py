@@ -37,7 +37,8 @@ def print_status(instructions, pipeline_processor):
                 print(f"{stage:<{max_opcode_length}}: {instr.opcode:<{max_oper_length}} | "
                       f"Oper1: {instr.oper1 if instr.oper1 is not None else '':<{max_oper_length}} | "
                       f"Oper2: {instr.oper2 if instr.oper2 is not None else '':<{max_oper_length}} | "
-                      f"Oper3: {instr.oper3 if instr.oper3 is not None else '':<{max_oper_length}}")
+                      f"Oper3: {instr.oper3 if instr.oper3 is not None else '':<{max_oper_length}}| "
+                      f"Valida: {instr.valida}")
             else:
                 print(f"{stage:<{max_opcode_length}}: (Vazio)")
             
