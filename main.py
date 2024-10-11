@@ -6,7 +6,8 @@ import simulador_pipeline.load_program
 def print_status(instructions, pipeline_processor):
     # Exibe o ciclo de clock atual
     print(f" CICLO DE CLOCK: {pipeline_processor.clock_cycle} ".center(40, '-'))
-    
+    print(f" Executadas: {pipeline_processor.instruction_valid} | Inválidas: {pipeline_processor.instruction_invalid}".center(40))
+    print('\n')
     # Exibe o conteúdo dos registradores
     print(f" ESTADO DOS REGISTRADORES ".center(40, '='))
     for i in range(0, 32, 4):
@@ -51,7 +52,8 @@ def main():
     pipeline_processor = pipeline.Pipeline(registers,
                                            instruction_memory,
                                            data_memory,
-                                           label_map)
+                                           label_map,
+                                           input("Digite 1 para ativar a predição de desvio: ") == '1')
     
     while True:
         input("Pressione enter para avançar um ciclo de clock...")
