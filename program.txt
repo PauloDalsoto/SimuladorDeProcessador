@@ -5,10 +5,14 @@ noop
 add R2 R1 R2
 noop
 noop
-beq R2 R0 9
+beq R2 R0 15
+noop
+noop
 noop
 beq R0 R0 4
-lw R0 R11 one
+noop
+noop
+noop
 done halt
 neg1 .fill -1
 ten .fill 10
